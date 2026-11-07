@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1b6ef3">
+<title>جيرة</title>
+<style>
+:root{--bg:#f0f2f5;--card:#fff;--ink:#1c1e21;--mute:#65676b;--brand:#1b6ef3;--line:#e4e6eb;--red:#e0245e}
+@media(prefers-color-scheme:dark){:root{--bg:#18191a;--card:#242526;--ink:#e4e6eb;--mute:#b0b3b8;--line:#3a3b3c}}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:calc(70px + env(safe-area-inset-bottom))}
+header{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line);padding:12px 16px;padding-top:calc(12px + env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:24px;font-weight:800;color:var(--brand)}
+main{max-width:600px;margin:0 auto;padding:10px}
+.card{background:var(--card);border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.row{display:flex;gap:10px;align-items:center}
+.av{width:42px;height:42px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;font-size:18px;flex:none}
+.name{font-weight:700}.time{font-size:12px;color:var(--mute)}
+.body{margin:10px 0;line-height:1.7;white-space:pre-wrap;word-break:break-word;font-size:16px}
+textarea,input{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:22px;padding:11px 16px;font:inherit;outline:none}
+textarea{resize:none;border-radius:14px;min-height:70px;margin-top:10px}
+textarea:focus,input:focus{border-color:var(--brand)}
+.btn{background:var(--brand);color:#fff;border:0;border-radius:10px;padding:10px 18px;font:inherit;font-weight:700;cursor:pointer}
+.btn.full{width:100%;margin-top:10px;padding:13px}
+.acts{display:flex;border-top:1px solid var(--line);margin-top:8px;padding-top:4px}
+.act{flex:1;background:none;border:0;padding:10px;font:inherit;color:var(--mute);font-weight:600;cursor:pointer;border-radius:8px}
+.act:active{background:var(--bg)}.act.on{color:var(--red)}
+.cm{background:var(--bg);border-radius:14px;padding:8px 12px;margin-top:6px;font-size:15px}.cm b{font-size:13px}
+.cf{display:flex;gap:8px;margin-top:8px}.cf button{flex:none}
+.flash{background:#fff4d6;color:#7a5b00;padding:10px 14px;border-radius:10px;margin-bottom:10px}
+.auth{max-width:380px;margin:8vh auto 0}.auth h1{color:var(--brand);font-size:38px;text-align:center}
+.auth p{text-align:center;color:var(--mute);margin:4px 0 18px}.auth input{margin-bottom:10px}
+.link{color:var(--brand);font-weight:600;cursor:pointer;background:none;border:0;font:inherit}
+nav{position:fixed;bottom:0;inset-inline:0;background:var(--card);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;background:none;border:0;padding:10px 0;color:var(--mute);font:inherit;font-size:12px}
+nav button span{display:block;font-size:22px}nav button.on{color:var(--brand);font-weight:700}
+.empty{text-align:center;color:var(--mute);padding:40px 10px}
+.note{font-size:12px;color:var(--mute);line-height:1.6;margin-top:10px}
+
+.copyright{
+  text-align:center;
+  color:var(--mute);
+  font-size:10px;
+  line-height:1.5;
+  padding:12px 8px calc(14px + env(safe-area-inset-bottom));
+  opacity:.85;
+}
+
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<!--
+إعداد Firebase مرة واحدة:
+1) أنشئ مشروعًا من https://console.firebase.google.com
+2) أضف تطبيق Web وانسخ إعدادات firebaseConfig وضعها مكان القيم التجريبية بالأسفل.
+3) من Authentication > Sign-in method فعّل Email/Password.
+4) أنشئ Firestore Database.
+5) ضع قواعد Firestore الموجودة في نهاية هذا الملف داخل تبويب Rules ثم اضغط Publish.
+بعد ذلك ارفع ملف HTML على استضافة HTTPS أو افتحه من بيئة تسمح بالاتصال بـ Firebase.
+-->
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script>
+// ضع إعدادات مشروع Firebase الحقيقي هنا:
+const firebaseConfig = {
+  apiKey: "AIzaSyBlpxyd3OoOh9M74vfjN_4tCbeSxycelA0",
+  authDomain: "jeera-fca2a.firebaseapp.com",
+  projectId: "jeera-fca2a",
+  storageBucket: "jeera-fca2a.firebasestorage.app",
+  messagingSenderId: "1093444123156",
+  appId: "1:1093444123156:web:e613cdf0b31a46451f8501",
+  measurementId: "G-KRRS13ZQK8"
+};
+
+let view = 'feed', mode = 'login', msg = '', draft = '';
+let auth, db, currentUser = null, posts = [], stopPosts = null;
+let commentsOpen = {}, commentCache = {}, commentStops = {};
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const initials = name => esc((name || '؟').trim().charAt(0) || '؟');
+const when = ts => ts && ts.toDate ? ts.toDate().toLocaleString('ar-EG',{dateStyle:'medium',timeStyle:'short'}) : 'الآن';
+const showError = e => {
+  console.error(e);
+  const code = e && e.code ? e.code : '';
+  const messages = {
+    'auth/email-already-in-use':'الإيميل مستخدم بالفعل.',
+    'auth/invalid-email':'صيغة الإيميل غير صحيحة.',
+    'auth/weak-password':'كلمة السر ضعيفة؛ استخدم 6 أحرف على الأقل.',
+    'auth/user-not-found':'لا يوجد حساب بهذا الإيميل.',
+    'auth/wrong-password':'كلمة السر غير صحيحة.',
+    'auth/invalid-credential':'الإيميل أو كلمة السر غير صحيحة.',
+    'permission-denied':'قواعد Firebase لا تسمح بالعملية. راجع قواعد Firestore في آخر الملف.',
+    'unavailable':'الاتصال بالإنترنت غير متاح حاليًا.'
+  };
+  msg = messages[code] || ('حصل خطأ: ' + (e.message || 'حاول مرة أخرى'));
+  render();
+};
+function setMode(m){mode=m;msg='';render()}
+async function submitAuth(){
+  const email=$('em').value.trim(), pw=$('pw').value;
+  try{
+    if(mode==='register'){
+      const name=$('nm').value.trim();
+      if(!name || !email || pw.length<6){msg='اكتب الاسم والإيميل وكلمة سر من 6 أحرف على الأقل.';return render()}
+      const cred=await auth.createUserWithEmailAndPassword(email,pw);
+      await cred.user.updateProfile({displayName:name});
+      await db.collection('users').doc(cred.user.uid).set({name,email,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    }else{
+      await auth.signInWithEmailAndPassword(email,pw);
+    }
+    msg='';
+  }catch(e){showError(e)}
+}
+async function logout(){try{await auth.signOut()}catch(e){showError(e)}}
+function startFeed(){
+  if(stopPosts) stopPosts();
+  stopPosts=db.collection('posts').orderBy('createdAt','desc').limit(100).onSnapshot(snap=>{
+    posts=snap.docs.map(d=>({id:d.id,...d.data()}));
+    render();
+  },showError);
+}
+async function addPost(){
+  const t=$('nb')?.value.trim(); if(!t)return;
+  if(!currentUser)return;
+  try{
+    await db.collection('posts').add({
+      uid:currentUser.uid,
+      authorName:currentUser.displayName || 'مستخدم',
+      body:t.slice(0,1000),
+      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+      likes:[]
+    });
+    draft=''; msg='';
+  }catch(e){showError(e)}
+}
+async function like(id){
+  const p=posts.find(x=>x.id===id); if(!p)return;
+  const likes=Array.isArray(p.likes)?p.likes:[];
+  const next=likes.includes(currentUser.uid)
+    ? firebase.firestore.FieldValue.arrayRemove(currentUser.uid)
+    : firebase.firestore.FieldValue.arrayUnion(currentUser.uid);
+  try{await db.collection('posts').doc(id).update({likes:next})}catch(e){showError(e)}
+}
+function toggleC(id){
+  commentsOpen[id]=!commentsOpen[id];
+  if(commentsOpen[id] && !commentStops[id]){
+    commentStops[id]=db.collection('posts').doc(id).collection('comments').orderBy('createdAt','asc').onSnapshot(s=>{
+      commentCache[id]=s.docs.map(d=>({id:d.id,...d.data()}));
+      render();
+    },showError);
+  }
+  render();
+  if(commentsOpen[id]) setTimeout(()=> $('c'+id)?.focus(),0);
+}
+async function addComment(id){
+  const el=$('c'+id), t=el?.value.trim(); if(!t)return;
+  try{
+    await db.collection('posts').doc(id).collection('comments').add({
+      uid:currentUser.uid,
+      authorName:currentUser.displayName || 'مستخدم',
+      body:t.slice(0,500),
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    if(el)el.value='';
+  }catch(e){showError(e)}
+}
+async function del(id){
+  if(!confirm('هل تريد حذف المنشور؟'))return;
+  try{await db.collection('posts').doc(id).delete()}catch(e){showError(e)}
+}
+function postHTML(p){
+  const likes=Array.isArray(p.likes)?p.likes:[];
+  const liked=likes.includes(currentUser.uid);
+  const comments=commentCache[p.id]||[];
+  const own=p.uid===currentUser.uid;
+  return `<article class="card">
+    <div class="row"><div class="av">${initials(p.authorName)}</div>
+      <div><div class="name">${esc(p.authorName||'مستخدم')}</div><div class="time">${esc(when(p.createdAt))}</div></div>
+      ${own?`<button class="act" style="flex:none;margin-inline-start:auto;padding:4px 10px" onclick="del('${p.id}')">🗑</button>`:''}
+    </div>
+    <div class="body">${esc(p.body)}</div>
+    <div class="time">${likes.length} إعجاب · ${comments.length}${commentsOpen[p.id]?'':'+'} تعليق</div>
+    <div class="acts">
+      <button class="act ${liked?'on':''}" onclick="like('${p.id}')">${liked?'❤️':'🤍'} أعجبني</button>
+      <button class="act" onclick="toggleC('${p.id}')">💬 تعليق</button>
+    </div>
+    ${commentsOpen[p.id]?`<div>${comments.map(c=>`<div class="cm"><b>${esc(c.authorName||'مستخدم')}</b><br>${esc(c.body)}</div>`).join('')}
+      <div class="cf"><input id="c${p.id}" placeholder="اكتب تعليق..." maxlength="500" onkeydown="if(event.key==='Enter')addComment('${p.id}')"><button class="btn" onclick="addComment('${p.id}')">إرسال</button></div>
+    </div>`:''}
+  </article>`;
+}
+function render(){
+  const old=$('nb'); if(old)draft=old.value;
+  const flash=msg?`<div class="flash">${esc(msg)}</div>`:'';
+  if(!currentUser){
+    const reg=mode==='register';
+    $('app').innerHTML=`<main><div class="auth card"><h1>جيرة</h1><p>تواصل مع صحابك وأهلك</p>${flash}
+      ${reg?'<input id="nm" placeholder="الاسم" maxlength="40">':''}
+      <input id="em" type="email" placeholder="الإيميل" autocomplete="email">
+      <input id="pw" type="password" placeholder="كلمة السر" autocomplete="current-password" onkeydown="if(event.key==='Enter')submitAuth()">
+      <button class="btn full" onclick="submitAuth()">${reg?'إنشاء حساب':'تسجيل الدخول'}</button>
+      <p style="margin-top:16px">${reg?'عندك حساب؟ <button class="link" onclick="setMode(&#39;login&#39;)">ادخل</button>':'مفيش حساب؟ <button class="link" onclick="setMode(&#39;register&#39;)">اعمل حساب جديد</button>'}</p>
+      <div class="note">يلزم إعداد Firebase مرة واحدة حتى تعمل الحسابات والمنشورات بين أجهزة مختلفة.</div>
+    </div></main>`;
+    return;
+  }
+  let list=view==='profile'?posts.filter(p=>p.uid===currentUser.uid):posts;
+  let top=view==='feed'
+    ?`<div class="card"><div class="row"><div class="av">${initials(currentUser.displayName)}</div><b>إنت بتفكر في إيه يا ${esc((currentUser.displayName||'').split(' ')[0])}؟</b></div>
+      <textarea id="nb" maxlength="1000" placeholder="اكتب بوست...">${esc(draft)}</textarea>
+      <button class="btn full" onclick="addPost()">نشر</button></div>`
+    :`<div class="card row"><div class="av" style="width:64px;height:64px;font-size:26px">${initials(currentUser.displayName)}</div>
+      <div><div class="name" style="font-size:20px">${esc(currentUser.displayName||'مستخدم')}</div>
+      <div class="time">${esc(currentUser.email||'')} · ${list.length} بوست</div></div></div>`;
+  $('app').innerHTML=`<header><div class="logo">جيرة</div><button class="link time" onclick="logout()">خروج</button></header>
+    <main>${flash}${top}${list.map(postHTML).join('')||'<div class="empty">مفيش بوستات لسه. اكتب أول بوست!</div>'}</main>
+    <nav><button class="${view==='feed'?'on':''}" onclick="go('feed')"><span>🏠</span>الرئيسية</button>
+    <button class="${view==='profile'?'on':''}" onclick="go('profile')"><span>👤</span>حسابي</button></nav>`;
+}
+function go(v){view=v;msg='';render();window.scrollTo(0,0)}
+window.setMode=setMode;window.submitAuth=submitAuth;window.logout=logout;window.addPost=addPost;
+window.like=like;window.toggleC=toggleC;window.addComment=addComment;window.del=del;window.go=go;
+
+// اعرض واجهة تسجيل الدخول فورًا بدل انتظار رد Firebase
+render();
+
+try{
+  firebase.initializeApp(firebaseConfig);
+  auth=firebase.auth(); db=firebase.firestore();
+  auth.onAuthStateChanged(u=>{
+    currentUser=u;
+    if(u){view='feed';startFeed()}else{if(stopPosts)stopPosts();stopPosts=null;posts=[];view='feed'}
+    render();
+  });
+}catch(e){showError(e)}
+</script>
+
+<!-- قواعد Firestore المقترحة: انسخها إلى Firebase Console > Firestore Database > Rules
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    match /users/{userId} {
+      allow read: if signedIn();
+      allow create, update: if signedIn() && request.auth.uid == userId;
+    }
+    match /posts/{postId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.body is string
+        && request.resource.data.body.size() > 0
+        && request.resource.data.body.size() <= 1000;
+      allow update: if signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes']);
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+      match /comments/{commentId} {
+        allow read: if signedIn();
+        allow create: if signedIn()
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.body is string
+          && request.resource.data.body.size() > 0
+          && request.resource.data.body.size() <= 500;
+        allow update, delete: if signedIn()
+          && resource.data.uid == request.auth.uid;
+      }
+    }
+  }
+}
+-->
+
+<footer class="copyright">جميع الحقوق محفوظة © استوديو Open Key 2026</footer>
+</body>
+</html>
